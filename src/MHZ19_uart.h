@@ -15,8 +15,10 @@
 	#include "SoftwareSerial.h"
 #endif
 
-enum MHZ19_DATA { 
-	PPM, TEMPERATURE, STAT 
+struct mhz_data {
+    int co2;
+    int temp;
+    int status;
 };
 
 class MHZ19_uart
@@ -24,7 +26,7 @@ class MHZ19_uart
 public:
 	MHZ19_uart();
 	MHZ19_uart(int rx, int tx);
-	virtual ~MHZ19_uart();
+	~MHZ19_uart();
 
 #ifdef ARDUINO_ARCH_ESP32
 	void begin(int rx=-1, int tx=-1, int s=1);
@@ -38,6 +40,7 @@ public:
 	int getPPM();
 	int getTemperature();
 	int getStatus();
+	mhz_data getData();
 	
 	boolean isWarming();
 
@@ -47,7 +50,7 @@ protected:
 
 private:
 	uint8_t mhz19_checksum( uint8_t com[] );
-	int getSerialData(MHZ19_DATA flg);
+    mhz_data getSerialData();
 
 	static const int REQUEST_CNT = 8;
 	static const int RESPONSE_CNT = 9;

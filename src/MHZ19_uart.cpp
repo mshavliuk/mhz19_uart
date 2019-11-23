@@ -57,15 +57,19 @@ void MHZ19_uart::calibrateSpan(int ppm) {
 }
 
 int MHZ19_uart::getPPM() {
-	return getSerialData(PPM);
+	return getSerialData().co2;
 }
 
 int MHZ19_uart::getTemperature() {
-	return getSerialData(TEMPERATURE);
+	return getSerialData().temp;
 }
 
 int MHZ19_uart::getStatus() {
-	return getSerialData(STAT);
+	return getSerialData().status;
+}
+
+mhz_data MHZ19_uart::getData() {
+    return getSerialData();
 }
 
 boolean MHZ19_uart::isWarming(){
@@ -104,13 +108,12 @@ void MHZ19_uart::writeCommand(uint8_t cmd[], uint8_t* response) {
 	}
 
 }
-
 //private
 
-int MHZ19_uart::getSerialData(MHZ19_DATA flg) {
+mhz_data MHZ19_uart::getSerialData() {
 	uint8_t buf[MHZ19_uart::RESPONSE_CNT];
-	for( int i=0; i<MHZ19_uart::RESPONSE_CNT; i++){
-		buf[i]=0x0;
+	for(unsigned char & i : buf){
+		i=0x0;
 	}
 
 	writeCommand(getppm, buf);
@@ -125,18 +128,7 @@ int MHZ19_uart::getSerialData(MHZ19_DATA flg) {
 		co2 = co2temp = co2status = -1;
 	}
 
-	switch(flg) {
-		case MHZ19_DATA::TEMPERATURE:
-			return co2temp;
-			break;
-		case MHZ19_DATA::STAT:
-			return co2status;
-			break;
-		case MHZ19_DATA::PPM:
-		default:
-			return co2;
-			break;
-	}
+    return {co2, co2temp, co2status};
 }	
 
 uint8_t MHZ19_uart::mhz19_checksum( uint8_t com[] ) {
